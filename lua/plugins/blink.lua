@@ -15,9 +15,11 @@ return {
     },
     {
         'saghen/blink.cmp',
+        version = '2.*',
         dependencies = {
             'rcarriga/cmp-dap',
             'saghen/blink.compat',
+            'saghen/blink.lib',
             'L3MON4D3/LuaSnip',
         },
         opts = {
@@ -34,9 +36,9 @@ return {
 
                 per_filetype = {
                     sql = { 'snippets', 'dadbod', 'buffer' },
-                    ['dap-repl'] = { 'dap', score_offset = 200 },
-                    ['dapui_watches'] = { 'dap', score_offset = 200 },
-                    ['dapui_hover'] = { 'dap', score_offset = 200 },
+                    ['dap-repl'] = { 'dap' },
+                    ['dapui_watches'] = { 'dap' },
+                    ['dapui_hover'] = { 'dap' },
                 },
 
                 providers = {

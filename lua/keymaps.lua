@@ -61,102 +61,30 @@ M.lsp = function()
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist) --, opts)
 end
 
-M.neogit = function()
-    -- Open a Diffview against `rev`, but first mark untracked files as
-    -- intent-to-add (`git add -N`) so they show up in the diff. Diffview only
-    -- injects untracked files in the index-vs-worktree view, never for a commit
-    -- comparison, so this is the only way to see them here. The intent-to-add
-    -- entries are reset again as soon as the Diffview is closed, leaving the
-    -- index exactly as it was.
-    local function diffview_with_untracked(rev)
-        local untracked = vim.fn.systemlist("git ls-files --others --exclude-standard")
+M.git_diff = function()
+    local git_diff = require("git_diff")
 
-        local files = {}
-        for _, f in ipairs(untracked) do
-            if f ~= "" then
-                table.insert(files, vim.fn.shellescape(f))
-            end
-        end
+    vim.keymap.set("n", "<leader>gdm", git_diff.open_fork_point,
+        { desc = "View working changes against fork-point (main/master)" })
+    vim.keymap.set("n", "<leader>gdb", git_diff.open_big_diff,
+        { desc = "View big changes against fork-point (5+ lines)" })
+    vim.keymap.set("n", "<leader>gdl", git_diff.open_latest,
+        { desc = "View working changes against nearest parent branch (latest)" })
+    vim.keymap.set("n", "<leader>gdh", git_diff.open_head,
+        { desc = "View working changes against HEAD" })
+    vim.keymap.set("n", "<leader>gdc", git_diff.open_worktree,
+        { desc = "View staged and unstaged changes" })
 
-        if #files > 0 then
-            local args = table.concat(files, " ")
-            vim.fn.system("git add --intent-to-add -- " .. args)
-
-            -- Undo the intent-to-add once this Diffview is closed.
-            vim.api.nvim_create_autocmd("User", {
-                pattern = "DiffviewViewClosed",
-                once = true,
-                callback = function()
-                    vim.fn.system("git reset --quiet -- " .. args)
-                end,
-            })
-        end
-
-        vim.cmd("DiffviewOpen " .. rev)
+    for count = 1, 9 do
+        vim.keymap.set("n", "<leader>gd" .. count, function()
+            git_diff.open_ancestor(count)
+        end, { desc = "View working changes against HEAD~" .. count })
     end
-
-    vim.keymap.set('n', '<leader>gdm', function()
-        -- Helper to check if a branch exists
-        local function branch_exists(branch)
-            return vim.fn.system(
-                "git show-ref --verify --quiet refs/heads/" .. branch .. " && echo yes || echo no"
-            ):gsub("%s+", "") == "yes"
-        end
-
-        -- Prefer main, fallback to master
-        local base_branch = branch_exists("main") and "main" or "origin/master"
-
-        -- Find fork point
-        local merge_base = vim.fn.system(
-            "git merge-base HEAD " .. base_branch
-        ):gsub("%s+", "")
-
-        if merge_base == "" then
-            vim.notify("Could not determine merge base", vim.log.levels.ERROR)
-            return
-        end
-
-        diffview_with_untracked(merge_base)
-    end, { desc = "View working changes against fork-point (main/master)" })
-
-    vim.keymap.set('n', '<leader>gdl', function()
-        -- "git diff latest": diff working state against the nearest ancestor
-        -- that at least one *other* branch also contains. Handy when working on
-        -- several PRs stacked/rebased on top of each other.
-        --
-        -- Single git call: list commits reachable from HEAD but not from any
-        -- other branch, with --boundary so the excluded ancestors adjacent to
-        -- that range are printed (prefixed with '-'). In topo order the first
-        -- boundary commit is the nearest shared ancestor.
-        local current = vim.fn.system("git rev-parse --abbrev-ref HEAD"):gsub("%s+", "")
-
-        local out = vim.fn.systemlist(
-            "git rev-list --topo-order --boundary HEAD --not --exclude="
-                .. vim.fn.shellescape(current) .. " --branches"
-        )
-
-        local target
-        for _, line in ipairs(out) do
-            if line:sub(1, 1) == "-" then
-                target = line:sub(2):gsub("%s+", "")
-                break
-            end
-        end
-
-        if target and target ~= "" then
-            diffview_with_untracked(target)
-        else
-            vim.notify("No parent branch found for latest diff", vim.log.levels.WARN)
-        end
-    end, { desc = "View working changes against nearest parent branch (latest)" })
-
-    vim.keymap.set('n', '<leader>gdh', '<cmd>DiffviewOpen HEAD<CR>')
-    vim.keymap.set('n', '<leader>gdc', '<cmd>DiffviewOpen<CR>')
 
     vim.api.nvim_create_autocmd("FileType", {
         pattern = "DiffviewFiles",
         callback = function()
-            vim.keymap.set("n", "q", ":DiffviewClose<CR>", { buffer = true, desc = "Diffview: Open" })
+            vim.keymap.set("n", "q", ":DiffviewClose<CR>", { buffer = true, desc = "Diffview: Close" })
         end,
     })
 end

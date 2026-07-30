@@ -6,7 +6,7 @@ return {
             "sindrets/diffview.nvim",
         },
         config = function()
-            require('keymaps').neogit()
+            require('keymaps').git_diff()
         end
     }
 }

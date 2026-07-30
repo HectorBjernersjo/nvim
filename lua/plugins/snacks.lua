@@ -14,7 +14,7 @@ return {
             explorer = { enabled = false },
             git = { enabled = true },
             gitbrowse = { enabled = false },
-            image = { enabled = false },
+            image = { enabled = true },
             indent = { enabled = false },
             input = { enabled = false },
             layout = { enabled = false },
