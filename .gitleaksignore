@@ -1,0 +1,4 @@
+# Old OpenAI key, commented out, in the very first commit — the repo is public
+# so it was exposed long ago and has been revoked. Nothing to gain from a
+# history rewrite; ignore this one finding so the jjsync leak gate stays on.
+e5d968692af7d84c6ef031bfe84c4aaad2170ea4:after/plugin/ChatGPT.lua:openai-api-key:2
