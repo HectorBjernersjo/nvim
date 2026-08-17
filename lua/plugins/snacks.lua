@@ -1,3 +1,7 @@
+-- Rio speaks the kitty graphics protocol but snacks only auto-detects
+-- kitty/ghostty/wezterm, so force it on.
+vim.env.SNACKS_KITTY = "1"
+
 return {
     {
         "folke/snacks.nvim",
@@ -14,7 +18,19 @@ return {
             explorer = { enabled = false },
             git = { enabled = true },
             gitbrowse = { enabled = false },
-            image = { enabled = true },
+            image = {
+                enabled = true,
+                resolve = function(file, src)
+                    -- Obsidian puts pasted images in "09 - Inline media",
+                    -- so ![[Pasted image ...png]] resolves against it.
+                    if file:find("/obsidian/", 1, true) then
+                        local p = vim.fs.normalize("~/obsidian/09 - Inline media/" .. src)
+                        if vim.fn.filereadable(p) == 1 then
+                            return p
+                        end
+                    end
+                end,
+            },
             indent = { enabled = false },
             input = { enabled = false },
             layout = { enabled = false },
