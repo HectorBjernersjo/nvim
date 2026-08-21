@@ -96,6 +96,13 @@ return {
                 debug = {
                     scores = true,
                 },
+                win = {
+                    input = {
+                        keys = {
+                            ["<C-a>"] = { "qflist", mode = { "i", "n" } },
+                        },
+                    },
+                },
             },
             profiler = { enabled = false },
             quickfile = { enabled = false },
