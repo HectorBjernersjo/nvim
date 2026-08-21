@@ -38,7 +38,8 @@ local function rio_image_fix()
             pos = pos + 4096
             local m = pos <= #data and 1 or 0
             if first then
-                request({ a = "T", U = 1, t = "d", f = 100, i = o.i, p = o.p, c = o.c, r = o.r, m = m, data = chunk })
+                -- no p= here: rio draws nothing when a placement id is given
+                request({ a = "T", U = 1, t = "d", f = 100, i = o.i, c = o.c, r = o.r, m = m, data = chunk })
                 first = false
             else
                 request({ m = m, data = chunk })
