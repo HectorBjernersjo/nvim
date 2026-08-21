@@ -1,6 +1,9 @@
 -- Rio speaks the kitty graphics protocol but snacks only auto-detects
 -- kitty/ghostty/wezterm, so force it on.
 vim.env.SNACKS_KITTY = "1"
+-- Rio runs on the Windows side and can't read WSL paths, so images must be
+-- sent as data (t=d), not file paths. SSH mode does exactly that.
+vim.env.SNACKS_SSH = "1"
 
 return {
     {
