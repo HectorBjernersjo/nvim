@@ -1,9 +1,51 @@
 -- Rio speaks the kitty graphics protocol but snacks only auto-detects
 -- kitty/ghostty/wezterm, so force it on.
 vim.env.SNACKS_KITTY = "1"
--- Rio runs on the Windows side and can't read WSL paths, so images must be
--- sent as data (t=d), not file paths. SSH mode does exactly that.
-vim.env.SNACKS_SSH = "1"
+
+-- Rio can't render images the way snacks sends them, for two reasons:
+--  * it runs on the Windows side and can't read WSL paths, so images must
+--    be sent as data (t=d), never as file paths (t=f)
+--  * it doesn't implement standalone virtual placements (a=t + a=p draws
+--    nothing, while a=T,U=1 with the data inline works)
+-- So: skip snacks' own transmit, and when it asks for a placement, send the
+-- whole image as a chunked a=T,U=1 instead.
+local function rio_image_fix()
+    local Image = require("snacks.image.image")
+    local term = require("snacks.image.terminal")
+    local files = {} ---@type table<number, string> image id -> png file
+
+    function Image:send()
+        files[self.id] = self.file
+        self.sent = true
+        self:on_send()
+    end
+
+    local request = term.request
+    function term.request(o)
+        local file = o.a == "p" and o.U and files[o.i]
+        if not file then
+            return request(o)
+        end
+        local fd = io.open(file, "rb")
+        if not fd then
+            return
+        end
+        local data = vim.base64.encode(fd:read("*a"))
+        fd:close()
+        local pos, first = 1, true
+        while pos <= #data do
+            local chunk = data:sub(pos, pos + 4095)
+            pos = pos + 4096
+            local m = pos <= #data and 1 or 0
+            if first then
+                request({ a = "T", U = 1, t = "d", f = 100, i = o.i, p = o.p, c = o.c, r = o.r, m = m, data = chunk })
+                first = false
+            else
+                request({ m = m, data = chunk })
+            end
+        end
+    end
+end
 
 return {
     {
@@ -69,5 +111,9 @@ return {
             zen = { enabled = true }
         },
         keys = require('keymaps').snacks,
+        config = function(_, opts)
+            require("snacks").setup(opts)
+            rio_image_fix()
+        end,
     }
 }
