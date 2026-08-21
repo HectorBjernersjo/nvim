@@ -26,6 +26,7 @@ return {
 
     require("plugins.vim_tmux_navigator"),
     require("plugins.markdown_preview"),
+    require("plugins.img_clip"),
 
     -- require("plugins.theme"),
     -- require("plugins.gruvbox"),
