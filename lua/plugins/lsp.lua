@@ -59,7 +59,7 @@ return {
             -- vim.lsp.enable("pyright")
             vim.lsp.enable("hls")
             vim.lsp.enable("clangd")
-            -- vim.lsp.enable("dartls")
+            -- dartls is started by flutter-tools (plugins/flutter_tools.lua)
             vim.lsp.enable("rust_analyzer")
 
             -- Arduino (.ino) — arduino-language-server wraps clangd and needs a

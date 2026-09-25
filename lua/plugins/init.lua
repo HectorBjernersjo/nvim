@@ -23,6 +23,7 @@ return {
 
     require("plugins.lazydev"),
     require("plugins.roslyn"),
+    require("plugins.flutter_tools"),
 
     require("plugins.vim_tmux_navigator"),
     require("plugins.markdown_preview"),

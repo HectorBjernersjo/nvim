@@ -11,7 +11,7 @@ return {
             -- Parsers to always have available. Installed asynchronously;
             -- this is a no-op for parsers that are already installed.
             local ensure_installed = {
-                'bash', 'c', 'diff', 'html', 'lua', 'luadoc',
+                'bash', 'c', 'dart', 'diff', 'html', 'lua', 'luadoc',
                 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
             }
             ts.install(ensure_installed)
